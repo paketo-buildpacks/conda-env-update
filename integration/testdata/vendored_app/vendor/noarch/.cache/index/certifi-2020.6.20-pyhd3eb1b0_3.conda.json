@@ -1,0 +1,1 @@
+{"build": "pyhd3eb1b0_3", "build_number": 3, "depends": ["python"], "license": "ISC", "name": "certifi", "noarch": "python", "subdir": "noarch", "timestamp": 1604070482618, "version": "2020.6.20", "size": 159212, "md5": "32bb6146e083af30d8570ca1c84e826c", "sha256": "81b91cd200370892f8dfb533401003f0efd72d627465524bf18a22a9b80e7a14"}

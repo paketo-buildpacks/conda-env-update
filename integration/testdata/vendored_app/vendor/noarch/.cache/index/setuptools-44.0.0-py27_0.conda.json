@@ -1,0 +1,1 @@
+{"build": "py27_0", "build_number": 0, "depends": ["certifi >=2016.9.26", "python >=2.7,<2.8.0a0"], "license": "MIT", "license_family": "MIT", "name": "setuptools", "subdir": "linux-64", "timestamp": 1578326214617, "version": "44.0.0", "size": 524173, "md5": "e13744cd21153081b14d57ab174ee572", "sha256": "749a01518b03da55fee37d648c77d15463e365be375f48a25e4ac389cf45677e"}

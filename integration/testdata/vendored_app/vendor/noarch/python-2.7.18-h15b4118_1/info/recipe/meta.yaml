@@ -1,0 +1,132 @@
+# This file created by conda-build 3.18.11
+# meta.yaml template originally from:
+# /tmp/build/80754af9/rsync-recipes/python-2.7.18-on-linux_canary, last modified Thu Apr 23 22:38:43 2020
+# ------------------------------------------------
+
+package:
+    name: python
+    version: 2.7.18
+source:
+    -   patches:
+            - 0001-backport-Python-3.6-_PYTHON_SYSCONFIGDATA_NAME.patch
+            - 0002-Add-Anaconda-Distribution-version-logic.patch
+            - 0003-Darwin-Hack-sys.-exec_-prefix-if-run-from-python.app.patch
+            - 0004-Darwin-Add-arch-x86_64-to-UnicCCompiler-ld_args.patch
+            - 0005-Win32-distutils-Also-look-for-executable.bat.patch
+            - 0006-Win32-Change-FD_SETSIZE-from-512-to-2048.patch
+            - 0007-Win32-Fixes-for-Windows-GCC-interop-needed-by-RPy2-a.patch
+            - 0008-Do-not-pass-g-to-GCC-when-not-Py_DEBUG.patch
+            - 0009-Darwin-Look-in-sysroot-usr-lib-include-if-sysroot-is.patch
+            - 0010-runtime_library_dir_option-Use-1st-word-of-CC-as-com.patch
+            - 0011-Mark-sysconfigdata.py-as-utf-8.patch
+            - 0012-Fix-find_library-so-that-it-looks-in-sys.prefix-lib-.patch
+            - 0013-Fix-cross-compilation-on-Debian-based-distros.patch
+            - 0014-Disable-registry-lookup-unless-CONDA_PY_ALLOW_REG_PA.patch
+            - 0015-Unvendor-sqlite3.patch
+            - 0016-Add-CondaEcosystemModifyDllSearchPath.patch
+            - 0017-macOS-Allow-SDK-dir-suffixes-e.g.-usr-include-into-t.patch
+        sha256: da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814
+        url: https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+build:
+    detect_binary_files_with_prefix: true
+    ignore_run_exports:
+        - bzip2
+        - libgcc-ng
+        - libstdcxx-ng
+        - openssl
+    no_link:
+        - bin/python2.7
+    number: '1'
+    string: h15b4118_1
+requirements:
+    build:
+        - _libgcc_mutex 0.1 main
+        - binutils_impl_linux-64 2.33.1 he6710b0_7
+        - binutils_linux-64 2.33.1 h9595d00_15
+        - gcc_impl_linux-64 7.3.0 habb00fd_1
+        - gcc_linux-64 7.3.0 h553295d_15
+        - gxx_impl_linux-64 7.3.0 hdf63c60_1
+        - gxx_linux-64 7.3.0 h553295d_15
+        - ld_impl_linux-64 2.33.1 h53a641e_7
+        - libgcc-ng 9.1.0 hdf63c60_0
+        - libstdcxx-ng 9.1.0 hdf63c60_0
+        - libx11-common-cos6-x86_64 1.6.4 h023ea50_0
+        - libx11-cos6-x86_64 1.6.4 h64a1553_0
+        - libx11-devel-cos6-x86_64 1.6.4 hb9851ce_0
+        - make 4.2.1 h1bed415_1
+        - patch 2.7.6 h7b6447c_1001
+        - pkg-config 0.29.2 h1bed415_8
+        - xorg-x11-proto-devel-cos6-x86_64 7.7 h8d4a98b_0
+    host:
+        - _libgcc_mutex 0.1 main
+        - bzip2 1.0.8 h7b6447c_0
+        - ca-certificates 2020.1.1 0
+        - libedit 3.1.20181209 hc058e9b_0
+        - libffi 3.3 he6710b0_1
+        - libgcc-ng 9.1.0 hdf63c60_0
+        - libstdcxx-ng 9.1.0 hdf63c60_0
+        - ncurses 6.2 he6710b0_0
+        - openssl 1.1.1g h7b6447c_0
+        - readline 8.0 h7b6447c_0
+        - sqlite 3.31.1 h62c20be_1
+        - tk 8.6.8 hbc83047_0
+        - zlib 1.2.11 h7b6447c_3
+    run:
+        - ca-certificates
+        - libffi >=3.3,<3.4.0a0
+        - libgcc-ng >=7.3.0
+        - ncurses >=6.2,<7.0a0
+        - readline >=8.0,<9.0a0
+        - sqlite >=3.31.1,<4.0a0
+        - tk >=8.6.8,<8.7.0a0
+        - zlib >=1.2.11,<1.3.0a0
+test:
+    commands:
+        - python -V
+        - pydoc -h
+        - python-config --help
+        - export PATH=${CONDA_PREFIX}/${HOST}/sysroot/bin:${CONDA_PREFIX}/${HOST}/sysroot/usr/bin:${PATH}
+        - export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${CONDA_PREFIX}/${HOST}/sysroot/lib64:${CONDA_PREFIX}/${HOST}/sysroot/usr/lib:/usr/lib64:/usr/lib
+        - export DISPLAY=localhost:1
+        - bash -x ${CONDA_PREFIX}/*-linux-gnu/sysroot/usr/bin/xvfb-run python $PWD/tests.py
+        - python -c "import sysconfig; print sysconfig.get_config_var('CC')"
+        - _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata_x86_64_conda_cos6_linux_gnu python
+            -c "import sysconfig; print sysconfig.get_config_var('CC')"
+        - python -c 'import ssl; print(ssl.get_default_verify_paths())' | grep ${CONDA_PREFIX}
+    files:
+        - tests.py
+    requires:
+        - libxau-cos6-x86_64
+        - xorg-x11-server-xvfb-cos6-x86_64
+        - xorg-x11-xauth-cos6-x86_64
+about:
+    description: 'Python is a widely used high-level, general-purpose, interpreted,
+        dynamic
+
+        programming language. Its design philosophy emphasizes code
+
+        readability, and its syntax allows programmers to express concepts in
+
+        fewer lines of code than would be possible in languages such as C++ or
+
+        Java. The language provides constructs intended to enable clear programs
+
+        on both a small and large scale.
+
+        '
+    dev_url: https://docs.python.org/devguide/
+    doc_source_url: https://github.com/python/pythondotorg/blob/master/docs/source/index.rst
+    doc_url: https://www.python.org/doc/versions/
+    home: http://www.python.org/
+    license: PSF
+    license_file: LICENSE
+    summary: General purpose programming language
+extra:
+    copy_test_source_files: true
+    final: true
+    recipe-maintainers:
+        - jakirkham
+        - jjhelmus
+        - mingwandroid
+        - msarahan
+        - pelson

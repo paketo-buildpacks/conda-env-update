@@ -1,0 +1,1 @@
+{"build": "he6710b0_1", "build_number": 1, "depends": ["libgcc-ng >=7.3.0", "libstdcxx-ng >=7.3.0"], "license": "Free software (MIT-like)", "name": "ncurses", "subdir": "linux-64", "timestamp": 1588170439381, "version": "6.2", "size": 836147, "md5": "b7ddf5ee3934b7f54620e8f6c0ee8a95", "sha256": "b06808e9d147ff7d56f37d64eb55f09bfc1108ef0af22cb461e7ad20810bc236"}

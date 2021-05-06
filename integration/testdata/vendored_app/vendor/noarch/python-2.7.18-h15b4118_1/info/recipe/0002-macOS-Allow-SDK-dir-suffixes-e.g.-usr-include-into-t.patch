@@ -1,0 +1,41 @@
+From 71e0e40963f30e21d68971de284d4df476338f27 Mon Sep 17 00:00:00 2001
+From: Mike Sarahan <msarahan@gmail.com>
+Date: Mon, 21 Oct 2019 13:02:17 -0500
+Subject: [PATCH 2/2]  macOS: Allow SDK dir suffixes (e.g. /usr/include) into
+ the result of add_dir_to_list()
+
+---
+ setup.py | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index 67a2fcb..ccfdf0a 100644
+--- a/setup.py
++++ b/setup.py
+@@ -38,7 +38,11 @@ disabled_module_list = []
+ def add_dir_to_list(dirlist, dir):
+     """Add the directory 'dir' to the list 'dirlist' (at the front) if
+     1) 'dir' is not already in 'dirlist'
+-    2) 'dir' actually exists, and is a directory."""
++    2) 'dir' actually exists, and is a directory.
++    3) 'dir' is suffix for a macOS SDK directory (e.g. /usr/include) and
++        our host_platform is 'darwin' and appending macosx_sdk_root() to
++        dir[1:] (i.e. skipping the '/') is a directory.
++    """
+     if dir is not None and dir not in dirlist:
+         if host_platform == 'darwin' and is_macosx_sdk_path(dir):
+             # If in a macOS SDK path, check relative to the SDK root
+@@ -68,6 +72,10 @@ def macosx_sdk_root():
+     if MACOS_SDK_ROOT:
+         return MACOS_SDK_ROOT
+ 
++    if 'CONDA_BUILD_SYSROOT' in os.environ:
++        MACOS_SDK_ROOT = os.environ['CONDA_BUILD_SYSROOT']
++        return MACOS_SDK_ROOT
++
+     cflags = sysconfig.get_config_var('CFLAGS')
+     m = re.search(r'-isysroot\s+(\S+)', cflags)
+     if m is not None:
+-- 
+2.20.1
+

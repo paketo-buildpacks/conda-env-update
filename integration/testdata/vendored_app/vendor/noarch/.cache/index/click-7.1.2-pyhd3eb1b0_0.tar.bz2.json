@@ -1,0 +1,1 @@
+{"build": "pyhd3eb1b0_0", "build_number": 0, "depends": ["python"], "license": "BSD-3-Clause", "license_family": "BSD", "name": "click", "noarch": "python", "subdir": "noarch", "timestamp": 1610990606745, "version": "7.1.2", "size": 65208, "md5": "62c4d9050c9d92ac315a9ae52ec9c0df", "sha256": "13795c5b123ae6bd1102ad9a267a6b731da8557441a1e0265527bcd7f349393b"}

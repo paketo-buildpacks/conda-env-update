@@ -1,0 +1,24 @@
+{
+  "build": "pyhd3eb1b0_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/noarch",
+  "constrains": [],
+  "depends": [
+    "python"
+  ],
+  "features": "",
+  "fn": "werkzeug-1.0.1-pyhd3eb1b0_0.tar.bz2",
+  "license": "BSD 3-Clause",
+  "license_family": "BSD",
+  "md5": "855ae785dd316068d0b6cd3a5a5d2939",
+  "name": "werkzeug",
+  "noarch": "python",
+  "package_type": "noarch_python",
+  "sha256": "88c7d851dc2389b06d87fdc10875acb1ecb75d4f480b00c596392d0ffe39cf96",
+  "size": 244882,
+  "subdir": "noarch",
+  "timestamp": 1611932630411,
+  "track_features": "",
+  "url": "https://repo.anaconda.com/pkgs/main/noarch/werkzeug-1.0.1-pyhd3eb1b0_0.tar.bz2",
+  "version": "1.0.1"
+}

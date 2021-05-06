@@ -1,0 +1,28 @@
+{
+  "build": "pyhd3eb1b0_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/noarch",
+  "constrains": [],
+  "depends": [
+    "click >=5.1",
+    "itsdangerous >=0.24",
+    "jinja2 >=2.10.1",
+    "python",
+    "werkzeug >=0.15"
+  ],
+  "features": "",
+  "fn": "flask-1.1.2-pyhd3eb1b0_0.tar.bz2",
+  "license": "BSD 3-Clause",
+  "license_family": "BSD",
+  "md5": "eee9d2de0a27685197801b09c37b4762",
+  "name": "flask",
+  "noarch": "python",
+  "package_type": "noarch_python",
+  "sha256": "27ca2893c801fe24737b00c2dbab38b72a64a46eb0060761a05d70ec47b46211",
+  "size": 72032,
+  "subdir": "noarch",
+  "timestamp": 1611932668094,
+  "track_features": "",
+  "url": "https://repo.anaconda.com/pkgs/main/noarch/flask-1.1.2-pyhd3eb1b0_0.tar.bz2",
+  "version": "1.1.2"
+}

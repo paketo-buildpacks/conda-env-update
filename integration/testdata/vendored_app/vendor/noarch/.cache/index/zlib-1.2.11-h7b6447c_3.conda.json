@@ -1,0 +1,1 @@
+{"build": "h7b6447c_3", "build_number": 3, "depends": ["libgcc-ng >=7.3.0"], "license": "zlib", "license_family": "Other", "name": "zlib", "subdir": "linux-64", "timestamp": 1542814864621, "version": "1.2.11", "size": 104994, "md5": "50aa4407424985d56ec8ae2f94626aa9", "sha256": "5c5346ca7da14d7e11e15a8cc5e695d805ecb79c0e59d7043bea5843ffc493e5"}

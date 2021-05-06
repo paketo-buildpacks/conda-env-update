@@ -1,0 +1,4 @@
+{
+  "miniconda": "github.com/paketo-community/miniconda",
+  "build-plan": "github.com/paketo-community/build-plan"
+}

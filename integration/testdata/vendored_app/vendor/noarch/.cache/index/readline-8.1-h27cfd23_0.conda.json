@@ -1,0 +1,1 @@
+{"build": "h27cfd23_0", "build_number": 0, "depends": ["libgcc-ng >=7.3.0", "ncurses >=6.2,<7.0a0"], "license": "GPL-3.0", "name": "readline", "subdir": "linux-64", "timestamp": 1611868595060, "version": "8.1", "size": 371059, "md5": "715789a38d447bc0cccc936209ac78c0", "sha256": "5fe35471214d5fc544fa4c37808a6ffbd294d8f6d3ef5c484f2f72d7493e8d1d"}

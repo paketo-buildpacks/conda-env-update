@@ -1,0 +1,82 @@
+# This file created by conda-build 3.21.4
+# meta.yaml template originally from:
+# /home/ktietz/src/aggregate/flask-feedstock/recipe, last modified Wed Jan 27 12:58:03 2021
+# ------------------------------------------------
+
+package:
+  name: flask
+  version: 1.1.2
+source:
+  fn: Flask-1.1.2.tar.gz
+  sha256: 4efa1ae2d7c9865af48986de8aeb8504bf32c7f3d6fdc9353d34b21f4b127060
+  url: https://pypi.io/packages/source/F/Flask/Flask-1.1.2.tar.gz
+build:
+  entry_points:
+    - flask = flask.cli:main
+  noarch: python
+  number: '0'
+  script: /home/ktietz/src/ci/flask_1611932660458/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehol/bin/python
+    -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  string: pyhd3eb1b0_0
+requirements:
+  host:
+    - _libgcc_mutex 0.1 main
+    - _openmp_mutex 4.5 1_gnu
+    - ca-certificates 2020.12.8 ha847dfd_0
+    - certifi 2020.12.5 py39ha847dfd_0
+    - ld_impl_linux-s390x 2.33.1 h8daa219_19
+    - libedit 3.1.20191231 h2a837d6_0
+    - libffi 3.3 hd8db5ea_2
+    - libgcc-ng 9.3.0 hcace7e0_18
+    - libgomp 9.3.0 hcace7e0_18
+    - libstdcxx-ng 9.3.0 hc891710_18
+    - ncurses 6.2 h2a837d6_0
+    - openssl 1.1.1i h2a837d6_0
+    - pip 20.3.3 py39ha847dfd_0
+    - python 3.9.1 h76587ff_2
+    - readline 8.0 h2a837d6_0
+    - setuptools 51.1.2 py39ha847dfd_4
+    - sqlite 3.32.3 haa4ac92_0
+    - tk 8.6.10 h2795051_1
+    - tzdata 2020f h52ac0ba_0
+    - wheel 0.36.2 pyhd3eb1b0_0
+    - xz 5.2.5 h2a837d6_0
+    - zlib 1.2.11 h2a837d6_4
+  run:
+    - click >=5.1
+    - itsdangerous >=0.24
+    - jinja2 >=2.10.1
+    - python
+    - werkzeug >=0.15
+test:
+  commands:
+    - flask --help
+  imports:
+    - flask
+    - flask.json
+about:
+  description: 'Flask is a microframework for Python based on Werkzeug and Jinja2.
+    It''s
+
+    intended for getting started very quickly and was developed with best
+
+    intentions in mind.
+
+    '
+  dev_url: https://github.com/pallets/flask
+  doc_source_url: https://github.com/pallets/flask/blob/master/docs/index.rst
+  doc_url: http://flask.pocoo.org/docs/1.0/
+  home: http://flask.pocoo.org
+  license: BSD 3-Clause
+  license_family: BSD
+  license_file: LICENSE.rst
+  summary: A microframework based on Werkzeug, Jinja2 and good intentions.
+extra:
+  copy_test_source_files: true
+  final: true
+  recipe-maintainers:
+    - goanpeca
+    - marcelotrevisani
+    - nehaljwani
+    - ukaratay
+    - xylar

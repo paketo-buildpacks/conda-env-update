@@ -1,0 +1,26 @@
+{
+  "arch": "x86_64",
+  "build": "py27_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/linux-64",
+  "constrains": [],
+  "depends": [
+    "python >=2.7,<2.8.0a0"
+  ],
+  "features": "",
+  "fn": "itsdangerous-1.1.0-py27_0.conda",
+  "legacy_bz2_md5": "f8a6a086ecac2dd6ef3c1dc56a6b70af",
+  "legacy_bz2_size": 26534,
+  "license": "BSD 3-Clause",
+  "license_family": "BSD",
+  "md5": "0fedac00a90c53b53a1df3a19e66deaa",
+  "name": "itsdangerous",
+  "platform": "linux",
+  "sha256": "66032557ddbf6cf6ebd3ad0f33c6932092e8a512b6be8a7295e87d8aee3468fe",
+  "size": 28323,
+  "subdir": "linux-64",
+  "timestamp": 1541025216123,
+  "track_features": "",
+  "url": "https://repo.anaconda.com/pkgs/main/linux-64/itsdangerous-1.1.0-py27_0.conda",
+  "version": "1.1.0"
+}

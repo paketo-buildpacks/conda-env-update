@@ -1,0 +1,1 @@
+{"build": "py27_0", "build_number": 0, "depends": ["python >=2.7,<2.8.0a0"], "license": "BSD 3-Clause", "license_family": "BSD", "name": "itsdangerous", "subdir": "linux-64", "timestamp": 1541025216123, "version": "1.1.0", "size": 28323, "md5": "0fedac00a90c53b53a1df3a19e66deaa", "sha256": "66032557ddbf6cf6ebd3ad0f33c6932092e8a512b6be8a7295e87d8aee3468fe"}

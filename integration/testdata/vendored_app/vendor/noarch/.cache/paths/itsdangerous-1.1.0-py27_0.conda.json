@@ -1,0 +1,161 @@
+{
+  "paths": [
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/INSTALLER",
+      "path_type": "hardlink",
+      "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+      "size_in_bytes": 4
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/LICENSE.rst",
+      "path_type": "hardlink",
+      "sha256": "feb28bfa348d816b0e7dbaeddf18499ee7e8007c67813db8d6ab37c65e046cd4",
+      "size_in_bytes": 2120
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/METADATA",
+      "path_type": "hardlink",
+      "sha256": "3f2d72fc6992a97d050a2cb337e150d245ba1da7b97a849f635d1a033bd5893f",
+      "size_in_bytes": 3062
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/RECORD",
+      "path_type": "hardlink",
+      "sha256": "6290891aea670b5aea5c2e74ad4d41cd1bac760421569a1761108004f38e9b27",
+      "size_in_bytes": 1588
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/WHEEL",
+      "path_type": "hardlink",
+      "sha256": "0a2850bc29ec1994011801cb11431fd08740e1f45db92fcd0544cc8024edbcf3",
+      "size_in_bytes": 110
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous-1.1.0.dist-info/top_level.txt",
+      "path_type": "hardlink",
+      "sha256": "80a37538a2e4f358bb7db5968a574903cf0443d3619c6312bd9aa17f3f480a39",
+      "size_in_bytes": 13
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "0ebf9291f15d3b2891fd68e2a885e7945a5844c5b45ef3c1355e66bb313937f0",
+      "size_in_bytes": 708
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/__init__.pyc",
+      "path_type": "hardlink",
+      "sha256": "399538ae872d91c46c70b0b485efd240c1ce90116fdc701d5ad976498e348d60",
+      "size_in_bytes": 1202
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/_compat.py",
+      "path_type": "hardlink",
+      "sha256": "a0000c710023c105d0a486ee1d3de8f9a2f9eb3b66ffb15efb8943ec8b5e17a0",
+      "size_in_bytes": 1133
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/_compat.pyc",
+      "path_type": "hardlink",
+      "sha256": "bbbf63e7da03a1bed82c120b6807449a8c85a50602c6807f0be9dee667564d9e",
+      "size_in_bytes": 1357
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/_json.py",
+      "path_type": "hardlink",
+      "sha256": "5bb04b2f844f9d23a335da3681f293dc178044c0888a463a3bbe6bc165745e81",
+      "size_in_bytes": 431
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/_json.pyc",
+      "path_type": "hardlink",
+      "sha256": "70327f006d6eeea2339101c01bfda78706969f3ce4fddafa0f4ea636f5c01d3a",
+      "size_in_bytes": 1025
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/encoding.py",
+      "path_type": "hardlink",
+      "sha256": "2a163ce4fb07ddb1877b924034de0b319ff76f42305164519e7c35c2f2e56888",
+      "size_in_bytes": 1224
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/encoding.pyc",
+      "path_type": "hardlink",
+      "sha256": "00ae689b906dafe95283056033e59792a9d0bcc6075342fff106171bb31506d1",
+      "size_in_bytes": 2091
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/exc.py",
+      "path_type": "hardlink",
+      "sha256": "285c60ecad9732588c400c4be2391136013c7bbdf3da371168baf3c2a54e6e72",
+      "size_in_bytes": 2959
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/exc.pyc",
+      "path_type": "hardlink",
+      "sha256": "597b131ec332952f86aff5e7a3944fa3baa74d2eecedceacc6aed19cb097a587",
+      "size_in_bytes": 3837
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/jws.py",
+      "path_type": "hardlink",
+      "sha256": "e8b87d5be2eef03f6cedb45acecd196f7e5ec80666de9ccb799a8799110b7882",
+      "size_in_bytes": 7470
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/jws.pyc",
+      "path_type": "hardlink",
+      "sha256": "abbf894b6390508179cd05eb665c9711b7862634a28cfe122d3c57987c6beebc",
+      "size_in_bytes": 7757
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/serializer.py",
+      "path_type": "hardlink",
+      "sha256": "6d3f9d7e329e73dcdc29af10a3c9fb9875bff0cf970933cc385ab54d023f16fe",
+      "size_in_bytes": 8653
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/serializer.pyc",
+      "path_type": "hardlink",
+      "sha256": "346585806b970f4d5cd38bfb993a5148bd0b8d49ed7f42d0f40f2c8702edb58c",
+      "size_in_bytes": 9119
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/signer.py",
+      "path_type": "hardlink",
+      "sha256": "38e65b2bc5e89818d07ce144ba5f28b1eb27edf73cd0c5c1d0bd6bec4f3afc64",
+      "size_in_bytes": 6345
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/signer.pyc",
+      "path_type": "hardlink",
+      "sha256": "891dfe7bed3647c397dcecc59608a58e242b65901151fe29930a183a5b81fbe6",
+      "size_in_bytes": 6896
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/timed.py",
+      "path_type": "hardlink",
+      "sha256": "a27e50e655fb2d3fcb6844ce873175666ad16e26bc3fdf36eb747c16247233a6",
+      "size_in_bytes": 5635
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/timed.pyc",
+      "path_type": "hardlink",
+      "sha256": "ced52c6e74a82b5ccda7bfdfa1b7537ee750b722dbb78321c635202993f74d8d",
+      "size_in_bytes": 5315
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/url_safe.py",
+      "path_type": "hardlink",
+      "sha256": "c671536ae9083e65ba4309fab8d40b83375abbc46e00a9e9e4deee92e5f2923d",
+      "size_in_bytes": 2275
+    },
+    {
+      "_path": "lib/python2.7/site-packages/itsdangerous/url_safe.pyc",
+      "path_type": "hardlink",
+      "sha256": "ae4ee70b17ce5ccc3a4eabf352960b3cdefc22bcff7feb4a2d42271b7a5ed0b3",
+      "size_in_bytes": 2910
+    }
+  ],
+  "paths_version": 1
+}

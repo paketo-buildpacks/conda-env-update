@@ -1,0 +1,20 @@
+{
+  "arch": null,
+  "build": "pyhd3eb1b0_0",
+  "build_number": 0,
+  "depends": [
+    "click >=5.1",
+    "itsdangerous >=0.24",
+    "jinja2 >=2.10.1",
+    "python",
+    "werkzeug >=0.15"
+  ],
+  "license": "BSD 3-Clause",
+  "license_family": "BSD",
+  "name": "flask",
+  "noarch": "python",
+  "platform": null,
+  "subdir": "noarch",
+  "timestamp": 1611932668094,
+  "version": "1.1.2"
+}
