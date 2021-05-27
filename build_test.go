@@ -105,17 +105,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						"lockfile-sha": "some-sha",
 					},
 				},
-				{
-					Name:             "conda-env-cache",
-					Path:             filepath.Join(layersDir, "conda-env-cache"),
-					Cache:            true,
-					Build:            false,
-					Launch:           false,
-					SharedEnv:        packit.Environment{},
-					BuildEnv:         packit.Environment{},
-					LaunchEnv:        packit.Environment{},
-					ProcessLaunchEnv: map[string]packit.Environment{},
-				},
 			},
 		}))
 
@@ -129,6 +118,55 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(runner.ExecuteCall.Receives.CondaEnvPath).To(Equal(filepath.Join(layersDir, "conda-env")))
 		Expect(runner.ExecuteCall.Receives.CondaCachePath).To(Equal(filepath.Join(layersDir, "conda-env-cache")))
 		Expect(runner.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
+	})
+
+	context("when the runner executes outputting a non-empty cache dir", func() {
+		it.Before(func() {
+			runner.ExecuteCall.Stub = func(_, c, _ string) error {
+				Expect(os.Mkdir(c, os.ModePerm)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(c, "some-file"), []byte{}, os.ModePerm)).To(Succeed())
+				return nil
+			}
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(layersDir, "conda-env-cache"))).To(Succeed())
+		})
+
+		it("cache layer is exported", func() {
+			result, err := build(packit.BuildContext{
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result).To(Equal(packit.BuildResult{
+				Layers: []packit.Layer{
+					{
+						Name:             "conda-env",
+						Path:             filepath.Join(layersDir, "conda-env"),
+						SharedEnv:        packit.Environment{},
+						BuildEnv:         packit.Environment{},
+						LaunchEnv:        packit.Environment{},
+						ProcessLaunchEnv: map[string]packit.Environment{},
+						Metadata: map[string]interface{}{
+							"built_at":     clock.Now().Format(time.RFC3339Nano),
+							"lockfile-sha": "some-sha",
+						},
+					},
+					{
+						Name:             "conda-env-cache",
+						Path:             filepath.Join(layersDir, "conda-env-cache"),
+						Cache:            true,
+						Build:            false,
+						Launch:           false,
+						SharedEnv:        packit.Environment{},
+						BuildEnv:         packit.Environment{},
+						LaunchEnv:        packit.Environment{},
+						ProcessLaunchEnv: map[string]packit.Environment{},
+					},
+				},
+			}))
+		})
 	})
 
 	context("when a build plan entry requires conda-environment at launch", func() {

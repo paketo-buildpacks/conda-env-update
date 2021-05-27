@@ -1,10 +1,12 @@
 package condaenvupdate
 
 import (
+	"os"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/fs"
 	"github.com/paketo-buildpacks/packit/scribe"
 )
 
@@ -80,11 +82,15 @@ func Build(planner Planner, runner Runner, logger scribe.Logger, clock chronos.C
 		condaLayer.Cache = condaLayer.Build
 		condaCacheLayer.Cache = true
 
+		layers := []packit.Layer{condaLayer}
+		if _, err := os.Stat(condaCacheLayer.Path); err == nil {
+			if !fs.IsEmptyDir(condaCacheLayer.Path) {
+				layers = append(layers, condaCacheLayer)
+			}
+		}
+
 		return packit.BuildResult{
-			Layers: []packit.Layer{
-				condaLayer,
-				condaCacheLayer,
-			},
+			Layers: layers,
 		}, nil
 	}
 }
