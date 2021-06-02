@@ -1,12 +1,12 @@
 api = "0.5"
 
 [buildpack]
-  id = "paketo-community/conda-env-update"
   homepage = "https://github.com/paketo-community/conda-env-update"
+  id = "paketo-community/conda-env-update"
   name = "Paketo Conda Env Update Buildpack"
 
 [metadata]
-  include-files = ["bin/run","bin/build","bin/detect","buildpack.toml"]
+  include-files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml"]
   pre-package = "./scripts/build.sh"
 
 [[stacks]]
