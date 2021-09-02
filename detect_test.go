@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
-	condaenvupdate "github.com/paketo-community/conda-env-update"
+	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

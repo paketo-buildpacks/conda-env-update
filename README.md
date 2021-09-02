@@ -3,8 +3,8 @@
 The Conda Env Update Buildpack runs commands to update the conda environment. It installs the conda environment into a
 layer which makes it available for subsequent buildpacks and in the final running container.
 
-The buildpack is published for consumption at `gcr.io/paketo-community/conda-env-update` and
-`paketocommunity/conda-env-update`.
+The buildpack is published for consumption at `gcr.io/paketo-buildpacks/conda-env-update` and
+`paketobuildpacks/conda-env-update`.
 
 ## Behavior
 

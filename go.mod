@@ -1,4 +1,4 @@
-module github.com/paketo-community/conda-env-update
+module github.com/paketo-buildpacks/conda-env-update
 
 go 1.16
 

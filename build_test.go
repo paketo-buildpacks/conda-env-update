@@ -11,8 +11,8 @@ import (
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-buildpacks/packit/scribe"
-	condaenvupdate "github.com/paketo-community/conda-env-update"
-	"github.com/paketo-community/conda-env-update/fakes"
+	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
+	"github.com/paketo-buildpacks/conda-env-update/fakes"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

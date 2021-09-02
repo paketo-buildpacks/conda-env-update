@@ -9,7 +9,7 @@ import (
 	"github.com/paketo-buildpacks/packit/fs"
 	"github.com/paketo-buildpacks/packit/pexec"
 	"github.com/paketo-buildpacks/packit/scribe"
-	condaenvupdate "github.com/paketo-community/conda-env-update"
+	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 )
 
 func main() {

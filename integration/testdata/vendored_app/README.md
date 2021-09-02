@@ -5,7 +5,7 @@ To recreate this vendored app:
 **Prerequisites**
 - Must be run on linux OS and **case-insensitive file system**
 - Install conda (using the [installer from the miniconda
-  buildpack](https://github.com/paketo-community/miniconda/blob/560c8d11b9f8cc8ad36eb3fcf3dda91ac946b850/buildpack.toml#L18)
+  buildpack](https://github.com/paketo-buildpacks/miniconda/blob/560c8d11b9f8cc8ad36eb3fcf3dda91ac946b850/buildpack.toml#L18)
 - Install conda build tools: `conda install conda-build`
 
 **Steps**

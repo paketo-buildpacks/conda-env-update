@@ -1,8 +1,8 @@
 api = "0.5"
 
 [buildpack]
-  homepage = "https://github.com/paketo-community/conda-env-update"
-  id = "paketo-community/conda-env-update"
+  homepage = "https://github.com/paketo-buildpacks/conda-env-update"
+  id = "paketo-buildpacks/conda-env-update"
   name = "Paketo Conda Env Update Buildpack"
 
 [metadata]
