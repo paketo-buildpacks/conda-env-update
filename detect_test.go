@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/sclevine/spec"
 

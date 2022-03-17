@@ -3,7 +3,7 @@ package condaenvupdate
 import (
 	"path/filepath"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 )
 
 // Detect returns a packit.DetectFunc that will be invoked during the

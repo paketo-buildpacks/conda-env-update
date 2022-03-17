@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit/pexec"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2/pexec"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/conda-env-update/fakes"
 	"github.com/sclevine/spec"

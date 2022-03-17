@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/conda-env-update/fakes"
 	"github.com/sclevine/spec"
