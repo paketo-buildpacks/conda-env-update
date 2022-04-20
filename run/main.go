@@ -3,22 +3,32 @@ package main
 import (
 	"os"
 
+	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/paketo-buildpacks/packit/v2/pexec"
+	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
-	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 )
 
-func main() {
-	logger := scribe.NewLogger(os.Stdout)
-	summer := fs.NewChecksumCalculator()
-	condaRunner := condaenvupdate.NewCondaRunner(pexec.NewExecutable("conda"), summer, logger)
-	planner := draft.NewPlanner()
+type Generator struct{}
 
-	packit.Run(condaenvupdate.Detect(),
-		condaenvupdate.Build(planner, condaRunner, logger, chronos.DefaultClock),
+func (f Generator) Generate(dir string) (sbom.SBOM, error) {
+	return sbom.Generate(dir)
+}
+
+func main() {
+	logger := scribe.NewEmitter(os.Stdout).WithLevel(os.Getenv("BP_LOG_LEVEL"))
+
+	packit.Run(
+		condaenvupdate.Detect(),
+		condaenvupdate.Build(
+			draft.NewPlanner(),
+			condaenvupdate.NewCondaRunner(pexec.NewExecutable("conda"), fs.NewChecksumCalculator(), logger),
+			Generator{},
+			logger,
+			chronos.DefaultClock),
 	)
 }

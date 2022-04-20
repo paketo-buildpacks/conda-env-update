@@ -7,10 +7,13 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 	"github.com/paketo-buildpacks/packit/v2/fs"
+	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 //go:generate faux --interface Planner --output fakes/planner.go
+//go:generate faux --interface Runner --output fakes/runner.go
+//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
 
 // Planner defines the interface for using the build and launch requirements from incoming Buildpack Plan entries
 // to determine whether a given layer should be available at build- and launch-time.
@@ -18,12 +21,14 @@ type Planner interface {
 	MergeLayerTypes(string, []packit.BuildpackPlanEntry) (launch bool, build bool)
 }
 
-//go:generate faux --interface Runner --output fakes/runner.go
-
 // Runner defines the interface for setting up the conda environment.
 type Runner interface {
 	Execute(condaEnvPath string, condaCachePath string, workingDir string) error
 	ShouldRun(workingDir string, metadata map[string]interface{}) (bool, string, error)
+}
+
+type SBOMGenerator interface {
+	Generate(dir string) (sbom.SBOM, error)
 }
 
 // Build will return a packit.BuildFunc that will be invoked during the build
@@ -32,7 +37,7 @@ type Runner interface {
 // Build updates the conda environment and stores the result in a layer. It may
 // reuse the environment layer from a previous build, depending on conditions
 // determined by the runner.
-func Build(planner Planner, runner Runner, logger scribe.Logger, clock chronos.Clock) packit.BuildFunc {
+func Build(planner Planner, runner Runner, sbomGenerator SBOMGenerator, logger scribe.Emitter, clock chronos.Clock) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
@@ -68,6 +73,26 @@ func Build(planner Planner, runner Runner, logger scribe.Logger, clock chronos.C
 
 			logger.Action("Completed in %s", duration.Round(time.Millisecond))
 			logger.Break()
+
+			logger.GeneratingSBOM(condaLayer.Path)
+
+			var sbomContent sbom.SBOM
+			duration, err = clock.Measure(func() error {
+				sbomContent, err = sbomGenerator.Generate(context.WorkingDir)
+				return err
+			})
+			if err != nil {
+				return packit.BuildResult{}, err
+			}
+			logger.Action("Completed in %s", duration.Round(time.Millisecond))
+			logger.Break()
+
+			logger.FormattingSBOM(context.BuildpackInfo.SBOMFormats...)
+
+			condaLayer.SBOM, err = sbomContent.InFormats(context.BuildpackInfo.SBOMFormats...)
+			if err != nil {
+				return packit.BuildResult{}, err
+			}
 
 			condaLayer.Metadata = map[string]interface{}{
 				"built_at":     clock.Now().Format(time.RFC3339Nano),

@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/paketo-buildpacks/packit/v2"
-	"github.com/paketo-buildpacks/packit/v2/chronos"
-	"github.com/paketo-buildpacks/packit/v2/scribe"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/conda-env-update/fakes"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/sbom"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -26,13 +27,16 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir string
 		cnbDir     string
 
-		runner  *fakes.Runner
-		planner *fakes.Planner
-		clock   chronos.Clock
-		now     time.Time
-		buffer  *bytes.Buffer
+		clock     chronos.Clock
+		timeStamp time.Time
+		buffer    *bytes.Buffer
 
-		build packit.BuildFunc
+		runner        *fakes.Runner
+		planner       *fakes.Planner
+		sbomGenerator *fakes.SBOMGenerator
+
+		build        packit.BuildFunc
+		buildContext packit.BuildContext
 	)
 
 	it.Before(func() {
@@ -47,20 +51,42 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		planner = &fakes.Planner{}
-
 		runner = &fakes.Runner{}
+		sbomGenerator = &fakes.SBOMGenerator{}
+
 		runner.ShouldRunCall.Returns.Bool = true
 		runner.ShouldRunCall.Returns.String = "some-sha"
 
-		now = time.Now()
+		sbomGenerator.GenerateCall.Returns.SBOM = sbom.SBOM{}
+
+		timeStamp = time.Now()
 		clock = chronos.NewClock(func() time.Time {
-			return now
+			return timeStamp
 		})
 
 		buffer = bytes.NewBuffer(nil)
-		logger := scribe.NewLogger(buffer)
+		logger := scribe.NewEmitter(buffer)
 
-		build = condaenvupdate.Build(planner, runner, logger, clock)
+		build = condaenvupdate.Build(planner, runner, sbomGenerator, logger, clock)
+		buildContext = packit.BuildContext{
+			BuildpackInfo: packit.BuildpackInfo{
+				Name:        "Some Buildpack",
+				Version:     "some-version",
+				SBOMFormats: []string{sbom.CycloneDXFormat, sbom.SPDXFormat},
+			},
+			WorkingDir: workingDir,
+			CNBPath:    cnbDir,
+			Plan: packit.BuildpackPlan{
+				Entries: []packit.BuildpackPlanEntry{
+					{
+						Name: "conda-environment",
+					},
+				},
+			},
+			Platform: packit.Platform{Path: "some-platform-path"},
+			Layers:   packit.Layers{Path: layersDir},
+			Stack:    "some-stack",
+		}
 	})
 
 	it.After(func() {
@@ -70,41 +96,37 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that builds correctly", func() {
-		context := packit.BuildContext{
-			WorkingDir: workingDir,
-			CNBPath:    cnbDir,
-			Stack:      "some-stack",
-			BuildpackInfo: packit.BuildpackInfo{
-				Name:    "Some Buildpack",
-				Version: "some-version",
-			},
-			Plan: packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: "conda-environment",
-					},
-				},
-			},
-			Layers: packit.Layers{Path: layersDir},
-		}
-
-		result, err := build(context)
+		result, err := build(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result).To(Equal(packit.BuildResult{
-			Layers: []packit.Layer{
-				{
-					Name:             "conda-env",
-					Path:             filepath.Join(layersDir, "conda-env"),
-					SharedEnv:        packit.Environment{},
-					BuildEnv:         packit.Environment{},
-					LaunchEnv:        packit.Environment{},
-					ProcessLaunchEnv: map[string]packit.Environment{},
-					Metadata: map[string]interface{}{
-						"built_at":     clock.Now().Format(time.RFC3339Nano),
-						"lockfile-sha": "some-sha",
-					},
-				},
+		layers := result.Layers
+		Expect(layers).To(HaveLen(1))
+
+		condaEnvLayer := layers[0]
+		Expect(condaEnvLayer.Name).To(Equal("conda-env"))
+		Expect(condaEnvLayer.Path).To(Equal(filepath.Join(layersDir, "conda-env")))
+
+		Expect(condaEnvLayer.Build).To(BeFalse())
+		Expect(condaEnvLayer.Launch).To(BeFalse())
+		Expect(condaEnvLayer.Cache).To(BeFalse())
+
+		Expect(condaEnvLayer.BuildEnv).To(BeEmpty())
+		Expect(condaEnvLayer.LaunchEnv).To(BeEmpty())
+		Expect(condaEnvLayer.ProcessLaunchEnv).To(BeEmpty())
+		Expect(condaEnvLayer.SharedEnv).To(BeEmpty())
+
+		Expect(condaEnvLayer.Metadata).To(HaveLen(2))
+		Expect(condaEnvLayer.Metadata["built_at"]).To(Equal(timeStamp.Format(time.RFC3339Nano)))
+		Expect(condaEnvLayer.Metadata["lockfile-sha"]).To(Equal("some-sha"))
+
+		Expect(condaEnvLayer.SBOM.Formats()).To(Equal([]packit.SBOMFormat{
+			{
+				Extension: sbom.Format(sbom.CycloneDXFormat).Extension(),
+				Content:   sbom.NewFormattedReader(sbom.SBOM{}, sbom.CycloneDXFormat),
+			},
+			{
+				Extension: sbom.Format(sbom.SPDXFormat).Extension(),
+				Content:   sbom.NewFormattedReader(sbom.SBOM{}, sbom.SPDXFormat),
 			},
 		}))
 
@@ -118,6 +140,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(runner.ExecuteCall.Receives.CondaEnvPath).To(Equal(filepath.Join(layersDir, "conda-env")))
 		Expect(runner.ExecuteCall.Receives.CondaCachePath).To(Equal(filepath.Join(layersDir, "conda-env-cache")))
 		Expect(runner.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
+
+		Expect(sbomGenerator.GenerateCall.Receives.Dir).To(Equal(workingDir))
 	})
 
 	context("when the runner executes outputting a non-empty cache dir", func() {
@@ -134,38 +158,22 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("cache layer is exported", func() {
-			result, err := build(packit.BuildContext{
-				Layers: packit.Layers{Path: layersDir},
-			})
+			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result).To(Equal(packit.BuildResult{
-				Layers: []packit.Layer{
-					{
-						Name:             "conda-env",
-						Path:             filepath.Join(layersDir, "conda-env"),
-						SharedEnv:        packit.Environment{},
-						BuildEnv:         packit.Environment{},
-						LaunchEnv:        packit.Environment{},
-						ProcessLaunchEnv: map[string]packit.Environment{},
-						Metadata: map[string]interface{}{
-							"built_at":     clock.Now().Format(time.RFC3339Nano),
-							"lockfile-sha": "some-sha",
-						},
-					},
-					{
-						Name:             "conda-env-cache",
-						Path:             filepath.Join(layersDir, "conda-env-cache"),
-						Cache:            true,
-						Build:            false,
-						Launch:           false,
-						SharedEnv:        packit.Environment{},
-						BuildEnv:         packit.Environment{},
-						LaunchEnv:        packit.Environment{},
-						ProcessLaunchEnv: map[string]packit.Environment{},
-					},
-				},
-			}))
+			layers := result.Layers
+			Expect(layers).To(HaveLen(2))
+
+			condaEnvLayer := layers[0]
+			Expect(condaEnvLayer.Name).To(Equal("conda-env"))
+
+			cacheLayer := layers[1]
+			Expect(cacheLayer.Name).To(Equal("conda-env-cache"))
+			Expect(cacheLayer.Path).To(Equal(filepath.Join(layersDir, "conda-env-cache")))
+
+			Expect(cacheLayer.Build).To(BeFalse())
+			Expect(cacheLayer.Launch).To(BeFalse())
+			Expect(cacheLayer.Cache).To(BeTrue())
 		})
 	})
 
@@ -175,40 +183,19 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("assigns the flag to the conda env layer", func() {
-			context := packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "some-version",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "conda-environment",
-						},
-					},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			}
-
-			result, err := build(context)
+			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(ContainElement(packit.Layer{
-				Name:             "conda-env",
-				Path:             filepath.Join(layersDir, "conda-env"),
-				Launch:           true,
-				Build:            false,
-				SharedEnv:        packit.Environment{},
-				BuildEnv:         packit.Environment{},
-				LaunchEnv:        packit.Environment{},
-				ProcessLaunchEnv: map[string]packit.Environment{},
-				Metadata: map[string]interface{}{
-					"built_at":     clock.Now().Format(time.RFC3339Nano),
-					"lockfile-sha": "some-sha",
-				},
-			}))
+
+			layers := result.Layers
+			Expect(layers).To(HaveLen(1))
+
+			condaEnvLayer := layers[0]
+			Expect(condaEnvLayer.Name).To(Equal("conda-env"))
+
+			Expect(condaEnvLayer.Build).To(BeFalse())
+			Expect(condaEnvLayer.Launch).To(BeTrue())
+			Expect(condaEnvLayer.Cache).To(BeFalse())
+
 			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
 			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 				{
@@ -224,41 +211,19 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("assigns build and cache to the conda env layer", func() {
-			context := packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "some-version",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "conda-environment",
-						},
-					},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			}
-
-			result, err := build(context)
+			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(ContainElement(packit.Layer{
-				Name:             "conda-env",
-				Path:             filepath.Join(layersDir, "conda-env"),
-				Launch:           false,
-				Build:            true,
-				Cache:            true,
-				SharedEnv:        packit.Environment{},
-				BuildEnv:         packit.Environment{},
-				LaunchEnv:        packit.Environment{},
-				ProcessLaunchEnv: map[string]packit.Environment{},
-				Metadata: map[string]interface{}{
-					"built_at":     clock.Now().Format(time.RFC3339Nano),
-					"lockfile-sha": "some-sha",
-				},
-			}))
+
+			layers := result.Layers
+			Expect(layers).To(HaveLen(1))
+
+			condaEnvLayer := layers[0]
+			Expect(condaEnvLayer.Name).To(Equal("conda-env"))
+
+			Expect(condaEnvLayer.Build).To(BeTrue())
+			Expect(condaEnvLayer.Launch).To(BeFalse())
+			Expect(condaEnvLayer.Cache).To(BeTrue())
+
 			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
 			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
 				{
@@ -275,35 +240,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		})
 		it("reuses cached conda env layer instead of running build process", func() {
-			context := packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "some-version",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "conda-environment",
-						},
-					},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			}
-
-			result, err := build(context)
+			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(ContainElement(packit.Layer{
-				Name:             "conda-env",
-				Path:             filepath.Join(layersDir, "conda-env"),
-				SharedEnv:        packit.Environment{},
-				BuildEnv:         packit.Environment{},
-				LaunchEnv:        packit.Environment{},
-				ProcessLaunchEnv: map[string]packit.Environment{},
-			}))
+			layers := result.Layers
+			Expect(layers).To(HaveLen(1))
+
+			condaEnvLayer := layers[0]
+			Expect(condaEnvLayer.Name).To(Equal("conda-env"))
 
 			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
 			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
@@ -322,21 +266,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				context := packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				}
-
-				_, err := build(context)
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
 		})
@@ -347,21 +277,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				context := packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				}
-
-				_, err := build(context)
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
 		})
@@ -372,21 +288,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				context := packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				}
-
-				_, err := build(context)
+				_, err := build(buildContext)
 				Expect(err).To(MatchError("some-shouldrun-error"))
 			})
 		})
@@ -402,21 +304,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				context := packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				}
-
-				_, err := build(context)
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("error could not create directory")))
 			})
 		})
@@ -428,22 +316,30 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				context := packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				}
-
-				_, err := build(context)
+				_, err := build(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("some execution error")))
+			})
+		})
+
+		context("when generating the SBOM returns an error", func() {
+			it.Before(func() {
+				buildContext.BuildpackInfo.SBOMFormats = []string{"random-format"}
+			})
+
+			it("returns an error", func() {
+				_, err := build(buildContext)
+				Expect(err).To(MatchError(`unsupported SBOM format: 'random-format'`))
+			})
+		})
+
+		context("when formatting the SBOM returns an error", func() {
+			it.Before(func() {
+				sbomGenerator.GenerateCall.Returns.Error = errors.New("failed to generate SBOM")
+			})
+
+			it("returns an error", func() {
+				_, err := build(buildContext)
+				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})
 	})

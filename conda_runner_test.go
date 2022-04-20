@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit/v2/pexec"
-	"github.com/paketo-buildpacks/packit/v2/scribe"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/conda-env-update/fakes"
+	"github.com/paketo-buildpacks/packit/v2/pexec"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -31,7 +31,7 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 		summer     *fakes.Summer
 		runner     condaenvupdate.CondaRunner
 		buffer     *bytes.Buffer
-		logger     scribe.Logger
+		logger     scribe.Emitter
 	)
 
 	it.Before(func() {
@@ -51,7 +51,7 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 
 		summer = &fakes.Summer{}
 		buffer = bytes.NewBuffer(nil)
-		logger = scribe.NewLogger(buffer)
+		logger = scribe.NewEmitter(buffer)
 		runner = condaenvupdate.NewCondaRunner(executable, summer, logger)
 	})
 

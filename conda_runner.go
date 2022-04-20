@@ -28,13 +28,13 @@ type Summer interface {
 
 // CondaRunner implements the Runner interface.
 type CondaRunner struct {
-	logger     scribe.Logger
+	logger     scribe.Emitter
 	executable Executable
 	summer     Summer
 }
 
 // NewCondaRunner creates an instance of CondaRunner given an Executable, a Summer, and a Logger.
-func NewCondaRunner(executable Executable, summer Summer, logger scribe.Logger) CondaRunner {
+func NewCondaRunner(executable Executable, summer Summer, logger scribe.Emitter) CondaRunner {
 	return CondaRunner{
 		executable: executable,
 		summer:     summer,

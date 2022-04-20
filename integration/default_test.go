@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
@@ -72,6 +73,76 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(container).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+		})
+
+		context("validating SBOM", func() {
+			var (
+				sbomDir string
+			)
+
+			it.Before(func() {
+				var err error
+				sbomDir, err = os.MkdirTemp("", "sbom")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(os.Chmod(sbomDir, os.ModePerm)).To(Succeed())
+			})
+
+			it.After(func() {
+				Expect(os.RemoveAll(sbomDir)).To(Succeed())
+			})
+
+			it("writes SBOM files to the layer and label metadata", func() {
+				var err error
+				var logs fmt.Stringer
+
+				source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
+				Expect(err).NotTo(HaveOccurred())
+
+				image, logs, err = pack.WithNoColor().Build.
+					WithPullPolicy("never").
+					WithBuildpacks(
+						minicondaBuildpack,
+						buildpack,
+						buildPlanBuildpack,
+					).
+					WithEnv(map[string]string{
+						"BP_LOG_LEVEL": "DEBUG",
+					}).
+					WithSBOMOutputDir(sbomDir).
+					Execute(name, source)
+				Expect(err).ToNot(HaveOccurred(), logs.String)
+
+				container, err = docker.Container.Run.
+					WithCommand("python app.py").
+					WithEnv(map[string]string{"PORT": "8080"}).
+					WithPublish("8080").
+					Execute(image.ID)
+				Expect(err).ToNot(HaveOccurred())
+
+				Eventually(container).Should(BeAvailable())
+				Eventually(container).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+
+				Expect(logs).To(ContainLines(
+					fmt.Sprintf("  Generating SBOM for /layers/%s/conda-env", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
+					MatchRegexp(`      Completed in \d+(\.?\d+)*`),
+				))
+				Expect(logs).To(ContainLines(
+					"  Writing SBOM in the following format(s):",
+					"    application/vnd.cyclonedx+json",
+					"    application/spdx+json",
+					"    application/vnd.syft+json",
+				))
+
+				// check that all required SBOM files are present
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "conda-env", "sbom.cdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "conda-env", "sbom.spdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "conda-env", "sbom.syft.json")).To(BeARegularFile())
+
+				// check an SBOM file to make sure it has an entry for a dependency from requirements.txt
+				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "conda-env", "sbom.cdx.json"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(string(contents)).To(ContainSubstring(`"name": "Flask"`))
+			})
 		})
 	})
 }
