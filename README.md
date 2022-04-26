@@ -54,6 +54,17 @@ build = true
 launch = true
 ```
 
+## SBOM
+
+This buildpack can generate a Software Bill of Materials (SBOM) for the dependencies of an application.
+
+However, this feature only works if an application vendors its dependencies in
+the `vendor` directory. This is due to a limitation in the upstream SBOM
+generation library (Syft).
+
+Applications that declare their dependencies via a `package-list.txt` file but
+do not vendor them will result in an empty SBOM.
+
 ## Usage
 
 To package this buildpack for consumption:
