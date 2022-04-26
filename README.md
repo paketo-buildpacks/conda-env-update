@@ -63,7 +63,7 @@ the `vendor` directory. This is due to a limitation in the upstream SBOM
 generation library (Syft).
 
 Applications that declare their dependencies via a `package-list.txt` file but
-do not vendor them will result in an empty SBOM.
+do not vendor them will result in an empty SBOM. Check out the [Paketo SBOM documentation](https://paketo.io/docs/howto/sbom/) for more information about how to access the SBOM.
 
 ## Usage
 
