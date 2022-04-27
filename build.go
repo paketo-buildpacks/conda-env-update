@@ -95,7 +95,6 @@ func Build(planner Planner, runner Runner, sbomGenerator SBOMGenerator, logger s
 			}
 
 			condaLayer.Metadata = map[string]interface{}{
-				"built_at":     clock.Now().Format(time.RFC3339Nano),
 				"lockfile-sha": sha,
 			}
 		} else {

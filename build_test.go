@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/conda-env-update/fakes"
@@ -27,9 +26,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir string
 		cnbDir     string
 
-		clock     chronos.Clock
-		timeStamp time.Time
-		buffer    *bytes.Buffer
+		buffer *bytes.Buffer
 
 		runner        *fakes.Runner
 		planner       *fakes.Planner
@@ -59,15 +56,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		sbomGenerator.GenerateCall.Returns.SBOM = sbom.SBOM{}
 
-		timeStamp = time.Now()
-		clock = chronos.NewClock(func() time.Time {
-			return timeStamp
-		})
-
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		build = condaenvupdate.Build(planner, runner, sbomGenerator, logger, clock)
+		build = condaenvupdate.Build(planner, runner, sbomGenerator, logger, chronos.DefaultClock)
 		buildContext = packit.BuildContext{
 			BuildpackInfo: packit.BuildpackInfo{
 				Name:        "Some Buildpack",
@@ -115,8 +107,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(condaEnvLayer.ProcessLaunchEnv).To(BeEmpty())
 		Expect(condaEnvLayer.SharedEnv).To(BeEmpty())
 
-		Expect(condaEnvLayer.Metadata).To(HaveLen(2))
-		Expect(condaEnvLayer.Metadata["built_at"]).To(Equal(timeStamp.Format(time.RFC3339Nano)))
+		Expect(condaEnvLayer.Metadata).To(HaveLen(1))
 		Expect(condaEnvLayer.Metadata["lockfile-sha"]).To(Equal("some-sha"))
 
 		Expect(condaEnvLayer.SBOM.Formats()).To(Equal([]packit.SBOMFormat{

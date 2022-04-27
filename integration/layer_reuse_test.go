@@ -103,7 +103,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				imagesMap[secondImage.ID] = nil
 
 				Expect(secondImage.Buildpacks[1].Key).To(Equal(buildpackInfo.Buildpack.ID))
-				Expect(secondImage.Buildpacks[1].Layers["conda-env"].Metadata["built_at"]).To(Equal(firstImage.Buildpacks[1].Layers["conda-env"].Metadata["built_at"]))
+				Expect(secondImage.Buildpacks[1].Layers["conda-env"].SHA).To(Equal(firstImage.Buildpacks[1].Layers["conda-env"].SHA))
 				Expect(secondImage.Buildpacks[1].Layers["conda-env"].Metadata["lockfile-sha"]).To(Equal(firstImage.Buildpacks[1].Layers["conda-env"].Metadata["lockfile-sha"]))
 
 				secondContainer, err = docker.Container.Run.
@@ -164,7 +164,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				imagesMap[secondImage.ID] = nil
 
 				Expect(secondImage.Buildpacks[1].Key).To(Equal(buildpackInfo.Buildpack.ID))
-				Expect(secondImage.Buildpacks[1].Layers["conda-env"].Metadata["built_at"]).NotTo(Equal(firstImage.Buildpacks[1].Layers["conda-env"].Metadata["built_at"]))
+				Expect(secondImage.Buildpacks[1].Layers["conda-env"].SHA).NotTo(Equal(firstImage.Buildpacks[1].Layers["conda-env"].SHA))
 
 				secondContainer, err = docker.Container.Run.
 					WithEnv(map[string]string{"PORT": "8080"}).
