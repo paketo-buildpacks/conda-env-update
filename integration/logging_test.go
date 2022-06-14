@@ -22,21 +22,27 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 		pack   occam.Pack
 		docker occam.Docker
 
-		image  occam.Image
 		name   string
 		source string
+
+		imagesMap map[string]interface{}
 	)
 
 	it.Before(func() {
 		pack = occam.NewPack()
 		docker = occam.NewDocker()
+
 		var err error
 		name, err = occam.RandomName()
 		Expect(err).NotTo(HaveOccurred())
+
+		imagesMap = map[string]interface{}{}
 	})
 
 	it.After(func() {
-		Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
+		for imageID := range imagesMap {
+			Expect(docker.Image.Remove.Execute(imageID)).To(Succeed())
+		}
 		Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
@@ -47,8 +53,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 			source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
 			Expect(err).NotTo(HaveOccurred())
 
-			var logs fmt.Stringer
-			image, logs, err = pack.WithNoColor().Build.
+			image, logs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					minicondaBuildpack,
@@ -57,6 +62,8 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			imagesMap[image.ID] = nil
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
@@ -70,19 +77,12 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("when app has lockfile", func() {
-		var secondImage occam.Image
-
-		it.After(func() {
-			Expect(docker.Image.Remove.Execute(secondImage.ID)).To(Succeed())
-		})
-
 		it("has correct logging output on initial build and rebuild", func() {
 			var err error
 			source, err = occam.Source(filepath.Join("testdata", "with_lock_file"))
 			Expect(err).NotTo(HaveOccurred())
 
-			var logs fmt.Stringer
-			image, logs, err = pack.WithNoColor().Build.
+			image, logs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					minicondaBuildpack,
@@ -91,6 +91,8 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			imagesMap[image.ID] = nil
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
@@ -101,7 +103,8 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(`      Completed in (\d+m)?(\d+)(\.\d+)?(ms|s)`),
 				"",
 			))
-			secondImage, logs, err = pack.WithNoColor().Build.
+
+			secondImage, logs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					minicondaBuildpack,
@@ -110,6 +113,8 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			imagesMap[secondImage.ID] = nil
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
@@ -125,8 +130,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 			source, err = occam.Source(filepath.Join("testdata", "default_app"))
 			Expect(err).NotTo(HaveOccurred())
 
-			var logs fmt.Stringer
-			image, logs, err = pack.WithNoColor().Build.
+			image, logs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					minicondaBuildpack,
@@ -135,6 +139,8 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			imagesMap[image.ID] = nil
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
