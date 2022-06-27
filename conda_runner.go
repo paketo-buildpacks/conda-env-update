@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
@@ -83,12 +84,12 @@ func (c CondaRunner) ShouldRun(workingDir string, metadata map[string]interface{
 // https://docs.conda.io/projects/conda/en/latest/commands/update.html
 // https://docs.conda.io/projects/conda/en/latest/commands/clean.html
 func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, workingDir string) error {
-	vendorDirExists, err := fileExists(filepath.Join(workingDir, "vendor"))
+	vendorDirExists, err := fs.Exists(filepath.Join(workingDir, "vendor"))
 	if err != nil {
 		return err
 	}
 
-	lockfileExists, err := fileExists(filepath.Join(workingDir, LockfileName))
+	lockfileExists, err := fs.Exists(filepath.Join(workingDir, LockfileName))
 	if err != nil {
 		return err
 	}
@@ -173,15 +174,4 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 	}
 
 	return nil
-}
-
-func fileExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
 }

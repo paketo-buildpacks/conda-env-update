@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/fs"
 )
 
 // Detect returns a packit.DetectFunc that will be invoked during the
@@ -14,11 +15,11 @@ import (
 // conda-environment and requires conda.
 func Detect() packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
-		envFile, err := fileExists(filepath.Join(context.WorkingDir, EnvironmentFileName))
+		envFile, err := fs.Exists(filepath.Join(context.WorkingDir, EnvironmentFileName))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat %s: %w", EnvironmentFileName, err)
 		}
-		lockFile, err := fileExists(filepath.Join(context.WorkingDir, LockfileName))
+		lockFile, err := fs.Exists(filepath.Join(context.WorkingDir, LockfileName))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat %s: %w", LockfileName, err)
 		}
