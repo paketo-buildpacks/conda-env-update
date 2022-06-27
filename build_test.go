@@ -29,7 +29,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer *bytes.Buffer
 
 		runner        *fakes.Runner
-		planner       *fakes.Planner
 		sbomGenerator *fakes.SBOMGenerator
 
 		build        packit.BuildFunc
@@ -47,7 +46,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		planner = &fakes.Planner{}
 		runner = &fakes.Runner{}
 		sbomGenerator = &fakes.SBOMGenerator{}
 
@@ -59,7 +57,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		build = condaenvupdate.Build(planner, runner, sbomGenerator, logger, chronos.DefaultClock)
+		build = condaenvupdate.Build(runner, sbomGenerator, logger, chronos.DefaultClock)
 		buildContext = packit.BuildContext{
 			BuildpackInfo: packit.BuildpackInfo{
 				Name:        "Some Buildpack",
@@ -71,7 +69,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Plan: packit.BuildpackPlan{
 				Entries: []packit.BuildpackPlanEntry{
 					{
-						Name: "conda-environment",
+						Name: condaenvupdate.CondaEnvPlanEntry,
 					},
 				},
 			},
@@ -121,13 +119,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}))
 
-		Expect(planner.MergeLayerTypesCall.CallCount).NotTo(BeZero())
-		Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
-		Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-			{
-				Name: "conda-environment",
-			},
-		}))
 		Expect(runner.ExecuteCall.Receives.CondaEnvPath).To(Equal(filepath.Join(layersDir, "conda-env")))
 		Expect(runner.ExecuteCall.Receives.CondaCachePath).To(Equal(filepath.Join(layersDir, "conda-env-cache")))
 		Expect(runner.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
@@ -170,7 +161,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when a build plan entry requires conda-environment at launch", func() {
 		it.Before(func() {
-			planner.MergeLayerTypesCall.Returns.Launch = true
+			buildContext.Plan.Entries[0].Metadata = map[string]interface{}{
+				"launch": true,
+			}
 		})
 
 		it("assigns the flag to the conda env layer", func() {
@@ -186,19 +179,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(condaEnvLayer.Build).To(BeFalse())
 			Expect(condaEnvLayer.Launch).To(BeTrue())
 			Expect(condaEnvLayer.Cache).To(BeFalse())
-
-			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
-			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-				{
-					Name: "conda-environment",
-				},
-			}))
 		})
 	})
 
 	context("when a build plan entry requires conda-environment at build", func() {
 		it.Before(func() {
-			planner.MergeLayerTypesCall.Returns.Build = true
+			buildContext.Plan.Entries[0].Metadata = map[string]interface{}{
+				"build": true,
+			}
 		})
 
 		it("assigns build and cache to the conda env layer", func() {
@@ -214,13 +202,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(condaEnvLayer.Build).To(BeTrue())
 			Expect(condaEnvLayer.Launch).To(BeFalse())
 			Expect(condaEnvLayer.Cache).To(BeTrue())
-
-			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
-			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-				{
-					Name: "conda-environment",
-				},
-			}))
 		})
 	})
 
@@ -228,8 +209,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			runner.ShouldRunCall.Returns.Bool = false
 			runner.ShouldRunCall.Returns.String = "cached-sha"
-
 		})
+
 		it("reuses cached conda env layer instead of running build process", func() {
 			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
@@ -240,12 +221,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			condaEnvLayer := layers[0]
 			Expect(condaEnvLayer.Name).To(Equal("conda-env"))
 
-			Expect(planner.MergeLayerTypesCall.Receives.String).To(Equal("conda-environment"))
-			Expect(planner.MergeLayerTypesCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
-				{
-					Name: "conda-environment",
-				},
-			}))
 			Expect(runner.ExecuteCall.CallCount).To(BeZero())
 		})
 	})

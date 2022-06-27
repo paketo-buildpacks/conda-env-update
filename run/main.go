@@ -6,7 +6,6 @@ import (
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
-	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
@@ -25,7 +24,6 @@ func main() {
 	packit.Run(
 		condaenvupdate.Detect(),
 		condaenvupdate.Build(
-			draft.NewPlanner(),
 			condaenvupdate.NewCondaRunner(pexec.NewExecutable("conda"), fs.NewChecksumCalculator(), logger),
 			Generator{},
 			logger,

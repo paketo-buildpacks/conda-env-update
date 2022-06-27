@@ -6,20 +6,14 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
-//go:generate faux --interface Planner --output fakes/planner.go
 //go:generate faux --interface Runner --output fakes/runner.go
 //go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
-
-// Planner defines the interface for using the build and launch requirements from incoming Buildpack Plan entries
-// to determine whether a given layer should be available at build- and launch-time.
-type Planner interface {
-	MergeLayerTypes(string, []packit.BuildpackPlanEntry) (launch bool, build bool)
-}
 
 // Runner defines the interface for setting up the conda environment.
 type Runner interface {
@@ -37,7 +31,7 @@ type SBOMGenerator interface {
 // Build updates the conda environment and stores the result in a layer. It may
 // reuse the environment layer from a previous build, depending on conditions
 // determined by the runner.
-func Build(planner Planner, runner Runner, sbomGenerator SBOMGenerator, logger scribe.Emitter, clock chronos.Clock) packit.BuildFunc {
+func Build(runner Runner, sbomGenerator SBOMGenerator, logger scribe.Emitter, clock chronos.Clock) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
@@ -102,6 +96,7 @@ func Build(planner Planner, runner Runner, sbomGenerator SBOMGenerator, logger s
 			logger.Break()
 		}
 
+		planner := draft.NewPlanner()
 		condaLayer.Launch, condaLayer.Build = planner.MergeLayerTypes(CondaEnvPlanEntry, context.Plan.Entries)
 		condaLayer.Cache = condaLayer.Build
 		condaCacheLayer.Cache = true
