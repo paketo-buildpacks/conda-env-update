@@ -141,7 +141,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				// check an SBOM file to make sure it has an entry for a dependency from requirements.txt
 				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "conda-env", "sbom.cdx.json"))
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(contents)).To(ContainSubstring(`"name": "Flask"`))
+				Expect(string(contents)).To(ContainSubstring(`"name":"Flask"`))
 			})
 		})
 	})
