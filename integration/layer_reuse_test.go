@@ -45,6 +45,9 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			imagesMap = map[string]interface{}{}
 			containerMap = map[string]interface{}{}
+
+			source, err = occam.Source(filepath.Join("testdata", "with_lock_file"))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -62,8 +65,6 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		context("when the app has a lockfile and there are no changes between builds", func() {
 			it("reuses the cached packages layer", func() {
 				var err error
-				source, err = occam.Source(filepath.Join("testdata", "with_lock_file"))
-				Expect(err).NotTo(HaveOccurred())
 
 				var logs fmt.Stringer
 				firstImage, logs, err = pack.WithNoColor().Build.
@@ -121,10 +122,14 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		context("the app contains no lock file but there are no changes between builds", func() {
-			it("DOES NOT reuse the cached packages layer", func() {
+			it.Before(func() {
 				var err error
 				source, err = occam.Source(filepath.Join("testdata", "default_app"))
 				Expect(err).NotTo(HaveOccurred())
+			})
+
+			it("DOES NOT reuse the cached packages layer", func() {
+				var err error
 
 				var logs fmt.Stringer
 				firstImage, logs, err = pack.WithNoColor().Build.

@@ -38,6 +38,9 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
+
+			source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -49,8 +52,6 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 
 		it("uses the vendored dependencies for the build", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
-			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.

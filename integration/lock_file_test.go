@@ -39,6 +39,9 @@ func testLockFile(t *testing.T, context spec.G, it spec.S) {
 			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
+
+			source, err = occam.Source(filepath.Join("testdata", "with_lock_file"))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -51,8 +54,6 @@ func testLockFile(t *testing.T, context spec.G, it spec.S) {
 
 		it("installs dependencies in the app image based on the lock file", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "with_lock_file"))
-			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
