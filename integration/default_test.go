@@ -39,6 +39,9 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
+
+			source, err = occam.Source(filepath.Join("testdata", "default_app"))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -50,8 +53,6 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("builds an oci image that has the correct behavior", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "default_app"))
-			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
@@ -85,6 +86,9 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				sbomDir, err = os.MkdirTemp("", "sbom")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(os.Chmod(sbomDir, os.ModePerm)).To(Succeed())
+
+				source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			it.After(func() {
@@ -94,9 +98,6 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			it("writes SBOM files to the layer and label metadata", func() {
 				var err error
 				var logs fmt.Stringer
-
-				source, err = occam.Source(filepath.Join("testdata", "vendored_app"))
-				Expect(err).NotTo(HaveOccurred())
 
 				image, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
