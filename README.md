@@ -1,4 +1,4 @@
-# Paketo Conda Env Update Cloud Native Buildpack
+# Paketo Buildpack for Conda Env Update Cloud Native
 
 The Conda Env Update Buildpack runs commands to update the conda environment. It installs the conda environment into a
 layer which makes it available for subsequent buildpacks and in the final running container.
