@@ -39,6 +39,7 @@ func TestIntegration(t *testing.T) {
 	// Do not truncate Gomega matcher output
 	// The buildpack output text can be large and we often want to see all of it.
 	format.MaxLength = 0
+	SetDefaultEventuallyTimeout(10 * time.Second)
 
 	Expect := NewWithT(t).Expect
 
