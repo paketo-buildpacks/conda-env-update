@@ -57,7 +57,9 @@ func Build(runner Runner, sbomGenerator SBOMGenerator, logger scribe.Emitter, cl
 			}
 
 			logger.Process("Executing build process")
-
+			
+			os.Setenv("PYTHONPYCACHEPREFIX", "/tmp")
+			
 			duration, err := clock.Measure(func() error {
 				return runner.Execute(condaLayer.Path, condaCacheLayer.Path, context.WorkingDir)
 			})
