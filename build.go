@@ -67,6 +67,11 @@ func Build(runner Runner, sbomGenerator SBOMGenerator, logger scribe.Emitter, cl
 
 			logger.Action("Completed in %s", duration.Round(time.Millisecond))
 			logger.Break()
+			
+			err = os.RemoveAll(filepath.Join(condaLayer.Path, "conda-meta/history"))
+                	if err != nil {
+                        	panic(err)
+                	}
 
 			logger.GeneratingSBOM(condaLayer.Path)
 
