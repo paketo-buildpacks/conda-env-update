@@ -20,9 +20,10 @@ type Executable interface {
 	Execute(pexec.Execution) error
 }
 
-//go:generate faux --interface Summer --output fakes/summer.go
 // Summer defines the interface for computing a SHA256 for a set of files
 // and/or directories.
+//
+//go:generate faux --interface Summer --output fakes/summer.go
 type Summer interface {
 	Sum(arg ...string) (string, error)
 }
@@ -94,6 +95,8 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 		return err
 	}
 
+	historyFile := filepath.Join(condaLayerPath, "conda-meta", "history")
+
 	args := []string{
 		"create",
 		"--file", filepath.Join(workingDir, LockfileName),
@@ -123,6 +126,12 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 			c.logger.Action("Failed to run conda %s", strings.Join(args, " "))
 			c.logger.Detail(buffer.String())
 			return fmt.Errorf("failed to run conda command: %w", err)
+		}
+
+		c.logger.Subprocess("Removing %s", historyFile)
+		err = os.RemoveAll(historyFile)
+		if err != nil {
+			return err
 		}
 
 		return nil
@@ -171,6 +180,12 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 		c.logger.Action("Failed to run conda %s", strings.Join(args, " "))
 		c.logger.Detail(buffer.String())
 		return fmt.Errorf("failed to run conda command: %w", err)
+	}
+
+	c.logger.Subprocess("Removing %s", historyFile)
+	err = os.RemoveAll(historyFile)
+	if err != nil {
+		return err
 	}
 
 	return nil

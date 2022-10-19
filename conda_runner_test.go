@@ -35,17 +35,18 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		var err error
+		workingDir = t.TempDir()
+		layersDir := t.TempDir()
 
-		workingDir, err = os.MkdirTemp("", "working-dir")
-		Expect(err).NotTo(HaveOccurred())
-		condaLayerPath = "a-conda-layer"
-		condaCachePath = "a-conda-cache-path"
+		condaLayerPath = filepath.Join(layersDir, "a-conda-layer")
+		condaCachePath = filepath.Join(layersDir, "a-conda-cache-path")
 
 		executable = &fakes.Executable{}
 		executions = []pexec.Execution{}
 		executable.ExecuteCall.Stub = func(ex pexec.Execution) error {
 			executions = append(executions, ex)
+			Expect(os.MkdirAll(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(condaLayerPath, "conda-meta", "history"), []byte("some content"), os.ModePerm)).To(Succeed())
 			return nil
 		}
 
@@ -53,10 +54,6 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger = scribe.NewEmitter(buffer)
 		runner = condaenvupdate.NewCondaRunner(executable, summer, logger)
-	})
-
-	it.After(func() {
-		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
 	context("ShouldRun", func() {
@@ -154,14 +151,66 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 				}))
 				Expect(executions[0].Env).NotTo(ContainElement(fmt.Sprintf("CONDA_PKGS_DIRS=%s", condaCachePath)))
 				Expect(executable.ExecuteCall.CallCount).To(Equal(1))
+
+				historyFilepath := filepath.Join(condaLayerPath, "conda-meta", "history")
+				Expect(historyFilepath).NotTo(BeAnExistingFile())
 			})
 
+			context("failure cases", func() {
+				context("when there is an error running the conda command", func() {
+					it.Before(func() {
+						executable.ExecuteCall.Stub = func(ex pexec.Execution) error {
+							fmt.Fprintln(ex.Stdout, "conda error stdout")
+							fmt.Fprintln(ex.Stderr, "conda error stderr")
+							return errors.New("some conda failure")
+						}
+					})
+
+					it("returns an error with stdout/stderr output", func() {
+						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
+						Expect(err).To(MatchError("failed to run conda command: some conda failure"))
+
+						args := []string{
+							"create",
+							"--file", filepath.Join(workingDir, "package-list.txt"),
+							"--prefix", condaLayerPath,
+							"--yes",
+							"--quiet",
+							"--channel", vendorPath,
+							"--override-channels",
+							"--offline",
+						}
+						Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf("Failed to run conda %s", strings.Join(args, " "))))
+						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
+						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
+					})
+				})
+
+				context("when the removing the history file fails with error", func() {
+					it.Before(func() {
+						executable.ExecuteCall.Stub = func(_ pexec.Execution) error {
+							Expect(os.MkdirAll(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
+							Expect(os.WriteFile(filepath.Join(condaLayerPath, "conda-meta", "history"), []byte("some content"), os.ModePerm)).To(Succeed())
+							Expect(os.Chmod(filepath.Join(condaLayerPath, "conda-meta"), 0)).To(Succeed())
+							return nil
+						}
+					})
+
+					it("returns the error", func() {
+						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
+						Expect(err).To(MatchError(ContainSubstring("%s: permission denied", filepath.Join(condaLayerPath, "conda-meta"))))
+						// Required for the automatic t.TempDir cleanup
+						Expect(os.Chmod(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
+					})
+				})
+			})
 		})
 
 		context("when a lockfile exists", func() {
 			it.Before(func() {
 				Expect(os.WriteFile(filepath.Join(workingDir, condaenvupdate.LockfileName), nil, os.ModePerm)).To(Succeed())
 			})
+
 			it("runs conda create with the cache layer available in the environment", func() {
 				err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
 				Expect(err).NotTo(HaveOccurred())
@@ -180,6 +229,9 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					"--packages",
 					"--tarballs",
 				}))
+
+				historyFilepath := filepath.Join(condaLayerPath, "conda-meta", "history")
+				Expect(historyFilepath).NotTo(BeAnExistingFile())
 			})
 		})
 
@@ -201,6 +253,9 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					"--packages",
 					"--tarballs",
 				}))
+
+				historyFilepath := filepath.Join(condaLayerPath, "conda-meta", "history")
+				Expect(historyFilepath).NotTo(BeAnExistingFile())
 			})
 
 			context("failure cases", func() {
@@ -231,36 +286,14 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					it("returns an error and logs the stdout and stderr output from the command", func() {
 						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
 						Expect(err).To(MatchError("failed to run conda command: some conda failure"))
-						Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf("Failed to run CONDA_PKGS_DIRS=%s conda env update --prefix a-conda-layer --file %s", condaCachePath, filepath.Join(workingDir, condaenvupdate.EnvironmentFileName))))
+						Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf(
+							"Failed to run CONDA_PKGS_DIRS=%s conda env update --prefix %s --file %s",
+							condaCachePath,
+							condaLayerPath,
+							filepath.Join(workingDir, condaenvupdate.EnvironmentFileName),
+						)))
 						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
 						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
-					})
-
-					context("and there is a vendor directory", func() {
-						var vendorPath string
-						it.Before(func() {
-							vendorPath = filepath.Join(workingDir, "vendor")
-							Expect(os.Mkdir(vendorPath, os.ModePerm))
-						})
-
-						it("returns an error and logs the stdout and stderr output from the command", func() {
-							err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
-							Expect(err).To(MatchError("failed to run conda command: some conda failure"))
-
-							args := []string{
-								"create",
-								"--file", filepath.Join(workingDir, "package-list.txt"),
-								"--prefix", condaLayerPath,
-								"--yes",
-								"--quiet",
-								"--channel", vendorPath,
-								"--override-channels",
-								"--offline",
-							}
-							Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf("Failed to run conda %s", strings.Join(args, " "))))
-							Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
-							Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
-						})
 					})
 				})
 
@@ -284,6 +317,30 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 						Expect(buffer.String()).To(ContainSubstring("Failed to run conda clean --packages --tarballs"))
 						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
 						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
+					})
+				})
+
+				context("when the removing the history file fails with error", func() {
+					it.Before(func() {
+						// Use the clean operation to create the error environment as it is the last thing that runs before
+						// the history file is removed
+						executable.ExecuteCall.Stub = func(ex pexec.Execution) error {
+							for _, arg := range ex.Args {
+								if arg == "clean" {
+									Expect(os.MkdirAll(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
+									Expect(os.WriteFile(filepath.Join(condaLayerPath, "conda-meta", "history"), []byte("some content"), os.ModePerm)).To(Succeed())
+									Expect(os.Chmod(filepath.Join(condaLayerPath, "conda-meta"), 0)).To(Succeed())
+								}
+							}
+							return nil
+						}
+					})
+
+					it("returns the error", func() {
+						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
+						Expect(err).To(MatchError(ContainSubstring("%s: permission denied", filepath.Join(condaLayerPath, "conda-meta"))))
+						// Required for the automatic t.TempDir cleanup
+						Expect(os.Chmod(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
 					})
 				})
 			})
