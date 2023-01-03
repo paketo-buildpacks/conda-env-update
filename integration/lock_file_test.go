@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
+	occamMatchers "github.com/paketo-buildpacks/occam/matchers"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
-	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testLockFile(t *testing.T, context spec.G, it spec.S) {
@@ -88,7 +88,7 @@ func testLockFile(t *testing.T, context spec.G, it spec.S) {
 				Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(container2).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+			Eventually(container2).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 		})
 	})
 }

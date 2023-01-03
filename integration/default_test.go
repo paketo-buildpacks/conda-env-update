@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
+	occamMatchers "github.com/paketo-buildpacks/occam/matchers"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
-	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testDefault(t *testing.T, context spec.G, it spec.S) {
@@ -73,7 +73,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(container).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+			Eventually(container).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 		})
 
 		context("validating SBOM", func() {
@@ -120,14 +120,14 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					Execute(image.ID)
 				Expect(err).ToNot(HaveOccurred())
 
-				Eventually(container).Should(BeAvailable())
-				Eventually(container).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+				Eventually(container).Should(occamMatchers.BeAvailable())
+				Eventually(container).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 
-				Expect(logs).To(ContainLines(
+				Expect(logs).To(occamMatchers.ContainLines(
 					fmt.Sprintf("  Generating SBOM for /layers/%s/conda-env", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
 					MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 				))
-				Expect(logs).To(ContainLines(
+				Expect(logs).To(occamMatchers.ContainLines(
 					"  Writing SBOM in the following format(s):",
 					"    application/vnd.cyclonedx+json",
 					"    application/spdx+json",

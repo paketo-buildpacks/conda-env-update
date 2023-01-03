@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
+	occamMatchers "github.com/paketo-buildpacks/occam/matchers"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
-	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
@@ -89,7 +89,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 				containerMap[firstContainer.ID] = nil
 
-				Eventually(firstContainer).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+				Eventually(firstContainer).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 
 				secondImage, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
@@ -117,7 +117,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 				containerMap[secondContainer.ID] = nil
 
-				Eventually(secondContainer).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+				Eventually(secondContainer).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 			})
 		})
 
@@ -154,7 +154,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 				containerMap[firstContainer.ID] = nil
 
-				Eventually(firstContainer).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+				Eventually(firstContainer).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 
 				secondImage, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
@@ -181,7 +181,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 				containerMap[secondContainer.ID] = nil
 
-				Eventually(secondContainer).Should(Serve(ContainSubstring("Hello, world!")).OnPort(8080))
+				Eventually(secondContainer).Should(occamMatchers.Serve(ContainSubstring("Hello, world!")).OnPort(8080))
 			})
 		})
 	})

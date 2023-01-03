@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/paketo-buildpacks/occam"
+	occamMatchers "github.com/paketo-buildpacks/occam/matchers"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/occam"
-	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testLogging(t *testing.T, context spec.G, it spec.S) {
@@ -65,7 +65,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 
 			imagesMap[image.ID] = nil
 
-			Expect(logs).To(ContainLines(
+			Expect(logs).To(occamMatchers.ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				fmt.Sprintf(
@@ -100,7 +100,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 
 			imagesMap[image.ID] = nil
 
-			Expect(logs).To(ContainLines(
+			Expect(logs).To(occamMatchers.ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				fmt.Sprintf(
@@ -129,7 +129,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 
 			imagesMap[secondImage.ID] = nil
 
-			Expect(logs).To(ContainLines(
+			Expect(logs).To(occamMatchers.ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				fmt.Sprintf("  Reusing cached layer /layers/%s/conda-env", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
 				"",
@@ -155,7 +155,7 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 
 			imagesMap[image.ID] = nil
 
-			Expect(logs).To(ContainLines(
+			Expect(logs).To(occamMatchers.ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				fmt.Sprintf("    Running CONDA_PKGS_DIRS=/layers/%s/conda-env-cache conda env update --prefix /layers/%s/conda-env --file /workspace/environment.yml",
