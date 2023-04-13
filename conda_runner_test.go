@@ -16,6 +16,7 @@ import (
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
+	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
 func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
@@ -47,6 +48,8 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 			executions = append(executions, ex)
 			Expect(os.MkdirAll(filepath.Join(condaLayerPath, "conda-meta"), os.ModePerm)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(condaLayerPath, "conda-meta", "history"), []byte("some content"), os.ModePerm)).To(Succeed())
+			fmt.Fprintln(ex.Stdout, "stdout output")
+			fmt.Fprintln(ex.Stderr, "stderr output")
 			return nil
 		}
 
@@ -139,7 +142,7 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 				err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(executions[0].Args).To(Equal([]string{
+				args := []string{
 					"create",
 					"--file", filepath.Join(workingDir, "package-list.txt"),
 					"--prefix", condaLayerPath,
@@ -148,9 +151,16 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					"--channel", vendorPath,
 					"--override-channels",
 					"--offline",
-				}))
+				}
+
+				Expect(executions[0].Args).To(Equal(args))
 				Expect(executions[0].Env).NotTo(ContainElement(fmt.Sprintf("CONDA_PKGS_DIRS=%s", condaCachePath)))
 				Expect(executable.ExecuteCall.CallCount).To(Equal(1))
+				Expect(buffer.String()).To(ContainLines(
+					fmt.Sprintf("    Running 'conda %s'", strings.Join(args, " ")),
+					"      stdout output",
+					"      stderr output",
+				))
 
 				historyFilepath := filepath.Join(condaLayerPath, "conda-meta", "history")
 				Expect(historyFilepath).NotTo(BeAnExistingFile())
@@ -180,9 +190,11 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 							"--override-channels",
 							"--offline",
 						}
-						Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf("Failed to run conda %s", strings.Join(args, " "))))
-						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
-						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
+						Expect(buffer.String()).To(ContainLines(
+							fmt.Sprintf("    Running 'conda %s'", strings.Join(args, " ")),
+							"      conda error stdout",
+							"      conda error stderr",
+						))
 					})
 				})
 
@@ -286,14 +298,16 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					it("returns an error and logs the stdout and stderr output from the command", func() {
 						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
 						Expect(err).To(MatchError("failed to run conda command: some conda failure"))
-						Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf(
-							"Failed to run CONDA_PKGS_DIRS=%s conda env update --prefix %s --file %s",
-							condaCachePath,
-							condaLayerPath,
-							filepath.Join(workingDir, condaenvupdate.EnvironmentFileName),
-						)))
-						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
-						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
+						Expect(buffer.String()).To(ContainLines(
+							fmt.Sprintf(
+								"    Running 'CONDA_PKGS_DIRS=%s conda env update --prefix %s --file %s'",
+								condaCachePath,
+								condaLayerPath,
+								filepath.Join(workingDir, condaenvupdate.EnvironmentFileName),
+							),
+							"      conda error stdout",
+							"      conda error stderr",
+						))
 					})
 				})
 
@@ -314,9 +328,11 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 					it("returns an error", func() {
 						err := runner.Execute(condaLayerPath, condaCachePath, workingDir)
 						Expect(err).To(MatchError("failed to run conda command: some conda clean failure"))
-						Expect(buffer.String()).To(ContainSubstring("Failed to run conda clean --packages --tarballs"))
-						Expect(buffer.String()).To(ContainSubstring("conda error stdout"))
-						Expect(buffer.String()).To(ContainSubstring("conda error stderr"))
+						Expect(buffer.String()).To(ContainLines(
+							"    Running 'conda clean --packages --tarballs'",
+							"      conda error stdout",
+							"      conda error stderr",
+						))
 					})
 				})
 

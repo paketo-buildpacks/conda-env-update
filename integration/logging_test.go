@@ -69,9 +69,11 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				fmt.Sprintf(
-					"    Running conda create --file /workspace/package-list.txt --prefix /layers/%s/conda-env --yes --quiet --channel /workspace/vendor --override-channels --offline",
+					"    Running 'conda create --file /workspace/package-list.txt --prefix /layers/%s/conda-env --yes --quiet --channel /workspace/vendor --override-channels --offline'",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
 				),
+			))
+			Expect(logs).To(ContainLines(
 				fmt.Sprintf(
 					"    Removing /layers/%s/conda-env/conda-meta/history",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
@@ -104,11 +106,13 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				fmt.Sprintf(
-					"    Running CONDA_PKGS_DIRS=/layers/%s/conda-env-cache conda create --file /workspace/package-list.txt --prefix /layers/%s/conda-env --yes --quiet",
+					"    Running 'CONDA_PKGS_DIRS=/layers/%s/conda-env-cache conda create --file /workspace/package-list.txt --prefix /layers/%s/conda-env --yes --quiet'",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
 				),
-				"    Running conda clean --packages --tarballs",
+			))
+			Expect(logs).To(ContainLines("    Running 'conda clean --packages --tarballs'"))
+			Expect(logs).To(ContainLines(
 				fmt.Sprintf(
 					"    Removing /layers/%s/conda-env/conda-meta/history",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
@@ -158,9 +162,11 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
-				fmt.Sprintf("    Running CONDA_PKGS_DIRS=/layers/%s/conda-env-cache conda env update --prefix /layers/%s/conda-env --file /workspace/environment.yml",
+				fmt.Sprintf("    Running 'CONDA_PKGS_DIRS=/layers/%s/conda-env-cache conda env update --prefix /layers/%s/conda-env --file /workspace/environment.yml'",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
-				"    Running conda clean --packages --tarballs",
+			))
+			Expect(logs).To(ContainLines("    Running 'conda clean --packages --tarballs'"))
+			Expect(logs).To(ContainLines(
 				fmt.Sprintf(
 					"    Removing /layers/%s/conda-env/conda-meta/history",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),

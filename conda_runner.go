@@ -1,7 +1,6 @@
 package condaenvupdate
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -114,17 +113,14 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 		}
 		args = append(args, vendorArgs...)
 
-		c.logger.Subprocess("Running conda %s", strings.Join(args, " "))
+		c.logger.Subprocess("Running 'conda %s'", strings.Join(args, " "))
 
-		buffer := bytes.NewBuffer(nil)
 		err = c.executable.Execute(pexec.Execution{
 			Args:   args,
-			Stdout: buffer,
-			Stderr: buffer,
+			Stdout: c.logger.ActionWriter,
+			Stderr: c.logger.ActionWriter,
 		})
 		if err != nil {
-			c.logger.Action("Failed to run conda %s", strings.Join(args, " "))
-			c.logger.Detail(buffer.String())
 			return fmt.Errorf("failed to run conda command: %w", err)
 		}
 
@@ -146,19 +142,16 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 		}
 	}
 
-	c.logger.Subprocess("Running CONDA_PKGS_DIRS=%s conda %s", condaCachePath, strings.Join(args, " "))
+	c.logger.Subprocess("Running 'CONDA_PKGS_DIRS=%s conda %s'", condaCachePath, strings.Join(args, " "))
 
-	buffer := bytes.NewBuffer(nil)
 	err = c.executable.Execute(pexec.Execution{
 		Args:   args,
 		Env:    append(os.Environ(), fmt.Sprintf("CONDA_PKGS_DIRS=%s", condaCachePath)),
-		Stdout: buffer,
-		Stderr: buffer,
+		Stdout: c.logger.ActionWriter,
+		Stderr: c.logger.ActionWriter,
 	})
 
 	if err != nil {
-		c.logger.Action("Failed to run CONDA_PKGS_DIRS=%s conda %s", condaCachePath, strings.Join(args, " "))
-		c.logger.Detail(buffer.String())
 		return fmt.Errorf("failed to run conda command: %w", err)
 	}
 
@@ -168,17 +161,14 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 		"--tarballs",
 	}
 
-	c.logger.Subprocess("Running conda %s", strings.Join(args, " "))
+	c.logger.Subprocess("Running 'conda %s'", strings.Join(args, " "))
 
-	buffer = bytes.NewBuffer(nil)
 	err = c.executable.Execute(pexec.Execution{
 		Args:   args,
-		Stdout: buffer,
-		Stderr: buffer,
+		Stdout: c.logger.ActionWriter,
+		Stderr: c.logger.ActionWriter,
 	})
 	if err != nil {
-		c.logger.Action("Failed to run conda %s", strings.Join(args, " "))
-		c.logger.Detail(buffer.String())
 		return fmt.Errorf("failed to run conda command: %w", err)
 	}
 
