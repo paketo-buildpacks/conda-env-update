@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit/v2"
 	condaenvupdate "github.com/paketo-buildpacks/conda-env-update"
+	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -95,7 +95,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			_, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
 			})
-			Expect(err).To(MatchError(packit.Fail))
+			Expect(err).To(MatchError(packit.Fail.WithMessage("no 'environment.yml' and 'package-list.txt' found")))
 		})
 	})
 

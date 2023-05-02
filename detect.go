@@ -25,7 +25,7 @@ func Detect() packit.DetectFunc {
 		}
 
 		if !envFile && !lockFile {
-			return packit.DetectResult{}, packit.Fail
+			return packit.DetectResult{}, packit.Fail.WithMessage("no 'environment.yml' and 'package-list.txt' found")
 		}
 
 		return packit.DetectResult{
