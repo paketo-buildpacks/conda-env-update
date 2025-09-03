@@ -68,6 +68,13 @@ func testLogging(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
+			))
+
+			Expect(logs).To(ContainLines(
+				"    Running 'conda search --quiet --channel /workspace/vendor --override-channels --offline'",
+			))
+
+			Expect(logs).To(ContainLines(
 				fmt.Sprintf(
 					"    Running 'conda create --file /workspace/package-list.txt --prefix /layers/%s/conda-env --yes --quiet --channel /workspace/vendor --override-channels --offline'",
 					strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"),
