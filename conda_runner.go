@@ -73,6 +73,21 @@ func (c CondaRunner) ShouldRun(workingDir string, metadata map[string]interface{
 	return true, updatedLockfileSha, nil
 }
 
+func (c CondaRunner) loadChannelContent(args []string) error {
+	searchArgs := append([]string{"search", "--quiet"}, args...)
+	c.logger.Subprocess("Running 'conda %s'", strings.Join(searchArgs, " "))
+
+	err := c.executable.Execute(pexec.Execution{
+		Args:   searchArgs,
+		Stdout: c.logger.ActionWriter,
+		Stderr: c.logger.ActionWriter,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to run conda command: %w", err)
+	}
+	return err
+}
+
 // Execute runs the conda environment setup command and cleans up unnecessary
 // artifacts. If a vendor directory is present, it uses vendored packages and
 // installs them in offline mode. If a packages-list.txt file is present, it creates a
@@ -112,6 +127,12 @@ func (c CondaRunner) Execute(condaLayerPath string, condaCachePath string, worki
 			"--offline",
 		}
 		args = append(args, vendorArgs...)
+
+		// Workaround the vendor channel content does not seem to be loaded
+		err = c.loadChannelContent(vendorArgs)
+		if err != nil {
+			return err
+		}
 
 		c.logger.Subprocess("Running 'conda %s'", strings.Join(args, " "))
 
