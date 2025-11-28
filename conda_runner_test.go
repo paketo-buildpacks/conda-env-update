@@ -294,8 +294,10 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 				context("when the conda env command fails to run", func() {
 					it.Before(func() {
 						executable.ExecuteCall.Stub = func(ex pexec.Execution) error {
-							fmt.Fprintln(ex.Stdout, "conda error stdout")
-							fmt.Fprintln(ex.Stderr, "conda error stderr")
+							_, err := fmt.Fprintln(ex.Stdout, "conda error stdout")
+							Expect(err).NotTo(HaveOccurred())
+							_, err = fmt.Fprintln(ex.Stderr, "conda error stderr")
+							Expect(err).NotTo(HaveOccurred())
 							return errors.New("some conda failure")
 						}
 					})
@@ -321,8 +323,10 @@ func testCondaRunner(t *testing.T, context spec.G, it spec.S) {
 						executable.ExecuteCall.Stub = func(ex pexec.Execution) error {
 							for _, arg := range ex.Args {
 								if arg == "clean" {
-									fmt.Fprintln(ex.Stdout, "conda error stdout")
-									fmt.Fprintln(ex.Stderr, "conda error stderr")
+									_, err := fmt.Fprintln(ex.Stdout, "conda error stdout")
+							                Expect(err).NotTo(HaveOccurred())
+									_, err = fmt.Fprintln(ex.Stderr, "conda error stderr")
+							                Expect(err).NotTo(HaveOccurred())
 									return errors.New("some conda clean failure")
 								}
 							}
