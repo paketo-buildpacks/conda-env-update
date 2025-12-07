@@ -51,6 +51,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Reclain space
+      uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
