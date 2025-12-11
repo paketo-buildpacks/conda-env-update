@@ -57,6 +57,8 @@ jobs:
         # This might remove tools that are actually needed,
         # if set to "true" but frees about 6 GB
         tool-cache: false
+        # Since we are not removing large packages, the trade-off time VS space is not worth it.
+        mandb: false
         # Default settings from documentation
         android: true
         dotnet: true
