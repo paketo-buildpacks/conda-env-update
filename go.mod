@@ -116,7 +116,6 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v29.4.0+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
-	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.5 // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -206,7 +205,6 @@ require (
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
-	github.com/morikuni/aec v1.1.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/nix-community/go-nix v0.0.0-20250101154619-4bdde671e0a1 // indirect
@@ -315,7 +313,3 @@ require (
 
 // TO DO: Replace when syft is updated with io/fs.ReadDirFS (Pin go-diskfs to a version that includes the os.FileInfo type)
 replace github.com/diskfs/go-diskfs => github.com/diskfs/go-diskfs v1.7.0
-
-// TO DO: Replace when occam is updated for go-containerregistry v0.21+ (moby/moby/client interface)
-// Pin go-containerregistry to the version occam@v0.31.1 was built against
-replace github.com/google/go-containerregistry => github.com/google/go-containerregistry v0.20.6
