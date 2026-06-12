@@ -304,6 +304,3 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.52.0 // indirect
 )
-
-// TO DO: Replace when syft is updated with io/fs.ReadDirFS (Pin go-diskfs to a version that includes the os.FileInfo type)
-replace github.com/diskfs/go-diskfs => github.com/diskfs/go-diskfs v1.7.0
