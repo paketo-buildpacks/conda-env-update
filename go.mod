@@ -16,8 +16,8 @@ require (
 	cloud.google.com/go/auth v0.24.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.0 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
-	cloud.google.com/go/iam v1.14.0 // indirect
-	cloud.google.com/go/monitoring v1.31.0 // indirect
+	cloud.google.com/go/iam v1.15.0 // indirect
+	cloud.google.com/go/monitoring v1.32.0 // indirect
 	cloud.google.com/go/storage v1.70.0 // indirect
 	cyphar.com/go-pathrs v0.2.6 // indirect
 	dario.cat/mergo v1.0.2 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/anchore/packageurl-go v0.2.0 // indirect
 	github.com/anchore/stereoscope v0.3.4 // indirect
 	github.com/anchore/syft v1.55.0 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.1 // indirect
@@ -136,7 +136,7 @@ require (
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
-	github.com/github/go-spdx/v2 v2.7.1 // indirect
+	github.com/github/go-spdx/v2 v2.8.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.2 // indirect
 	github.com/go-git/go-git/v5 v5.19.3 // indirect
@@ -160,7 +160,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.24 // indirect
 	github.com/googleapis/gax-go/v2 v2.27.0 // indirect
 	github.com/gookit/color v1.6.3 // indirect
-	github.com/gpustack/gguf-parser-go v0.26.4 // indirect
+	github.com/gpustack/gguf-parser-go v0.27.0 // indirect
 	github.com/hashicorp/aws-sdk-go-base/v2 v2.0.0-beta.76 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
